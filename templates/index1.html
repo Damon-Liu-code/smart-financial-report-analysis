@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>智能财报分析系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.2/echarts.min.js"></script>
+    <style>
+        /* 卡片样式 */
+        .card-custom {
+            border: 1px solid #e1e1e1;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        .card-header-custom {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .card-body-custom {
+            padding: 1.5rem;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .risk-point {
+            color: #dc3545;
+        }
+
+        .growth-highlight {
+            color: #28a745;
+        }
+
+        .valuation-advice {
+            color: #ffc107;
+        }
+
+        .financial-table {
+            margin-bottom: 2rem;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .financial-table th, .financial-table td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: right;
+        }
+        .financial-table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">上市公司财报智能分析</h2>
+
+    <!-- 上传区域 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <input type="file" id="pdfUpload" accept=".pdf" class="form-control">
+            <div id="loading" class="mt-3" style="display:none;">
+                <div class="spinner-border text-primary"></div>
+                <span class="ms-2">分析中...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果显示 -->
+    <div id="resultPanel" style="display:none;" class="row">
+        <!-- 分析内容 -->
+        <div class="col-md-12">
+            <div id="analysisResult">
+                <!-- 动态渲染风险点 -->
+            </div>
+        </div>
+
+        <!-- 财务数据表格 -->
+        <div class="col-md-12">
+            <div id="tablesArea"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('pdfUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 显示加载状态
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('resultPanel').style.display = 'none';
+
+    fetch('/analyze', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.error) {
+            alert('错误: ' + data.error);
+            return;
+        }
+
+        // 渲染分析结果
+        renderAnalysis(data.html);
+
+        // 渲染表格
+        //renderTables(data.tables);
+
+        document.getElementById('resultPanel').style.display = 'block';
+    })
+    .finally(() => {
+        document.getElementById('loading').style.display = 'none';
+    });
+});
+
+function renderAnalysis(analysis) {
+    const analysisContainer = document.getElementById('analysisResult');
+
+    // 使用HTML字符串将返回的分析结果直接渲染
+    analysisContainer.innerHTML = analysis;
+}
+
+function renderTables(tables) {
+    const container = document.getElementById('tablesArea');
+    container.innerHTML = '';
+
+    // 遍历并渲染表格数据
+    Object.entries(tables).forEach(([tableType, tableData]) => {
+        if (tableData.length === 0) return;
+
+        // 创建表格标题
+        const titleEl = document.createElement('h5');
+        titleEl.className = 'mt-4 mb-3 text-primary';
+        titleEl.textContent = tableType === 'income_statement' ? '利润表' :
+                              tableType === 'balance_sheet' ? '资产负债表' : '现金流量表';
+        container.appendChild(titleEl);
+
+        // 创建表格
+        const table = document.createElement('table');
+        table.className = 'financial-table';
+
+        // 表头
+        const headerRow = document.createElement('tr');
+        const headers = tableData[0].split('|');
+        headers.forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header.trim();
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        // 表格内容
+        tableData.slice(1).forEach(row => {
+            const tr = document.createElement('tr');
+            row.split('|').forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell.trim();
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
+
+        container.appendChild(table);
+    });
+}
+</script>
+</body>
+</html>

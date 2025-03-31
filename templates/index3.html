@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>财报分析可视化看板</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.staticfile.org/echarts/5.4.2/echarts.min.js"></script>
+    <style>
+        .chart-container {
+            width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 风险图表 -->
+    <div id="riskChart" class="chart-container"></div>
+    
+    <!-- 增长图表 -->
+    <div id="growthChart" class="chart-container"></div>
+    
+    <!-- 估值图表 -->
+    <div id="valuationChart" class="chart-container"></div>
+
+    <script>
+    // 风险图表配置
+    const riskOption = {
+        title: { text: "核心风险指标对比" },
+        tooltip: {},
+        xAxis: { type: "value" },
+        yAxis: {
+            type: "category",
+            data: ["净利润增速","现金流","C端业务"]
+        },
+        series: [{
+            type: "bar",
+            data: [
+                {value: -3.84, name: "净利润增速", itemStyle: {color: "#c23531"}},
+                {value: -16.64, name: "现金流", itemStyle: {color: "#dd6666"}},
+                {value: -9.01, name: "C端业务", itemStyle: {color: "#ed9595"}}
+            ],
+            label: { show: true, position: "left" }
+        }]
+    };
+
+    // 增长图表配置
+    const growthOption = {
+        title: { text: "业务增长趋势" },
+        tooltip: { trigger: "axis" },
+        xAxis: {
+            type: "category",
+            data: ["智能文字识别","广告业务","研发投入"]
+        },
+        yAxis: { type: "value" },
+        series: [{
+            type: "line",
+            smooth: true,
+            data: [20.45, 33.70, 30.34],
+            lineStyle: { color: "#67c23a", width: 3 },
+            symbolSize: 10,
+            areaStyle: { color: "#e1f3d8" }
+        }]
+    };
+
+    // 估值图表配置
+    const valuationOption = {
+        title: { text: "估值多维分析" },
+        radar: {
+            indicator: [
+                { name: "PS适用性", max: 100 },
+                { name: "PEG匹配度", max: 100 },
+                { name: "研发转化率", max: 100 },
+                { name: "资产增长率", max: 100 }
+            ]
+        },
+        series: [{
+            type: "radar",
+            data: [{
+                value: [85, 78, 65, 92],
+                name: "估值维度",
+                areaStyle: { color: "rgba(103, 194, 58, 0.4)" }
+            }]
+        }]
+    };
+
+    // 初始化图表
+    window.onload = function() {
+        const riskChart = echarts.init(document.getElementById('riskChart'));
+        riskChart.setOption(riskOption);
+
+        const growthChart = echarts.init(document.getElementById('growthChart'));
+        growthChart.setOption(growthOption);
+
+        const valuationChart = echarts.init(document.getElementById('valuationChart'));
+        valuationChart.setOption(valuationOption);
+        
+        // 窗口调整时自适应
+        window.addEventListener('resize', function() {
+            riskChart.resize();
+            growthChart.resize();
+            valuationChart.resize();
+        });
+    };
+    </script>
+</body>
+</html>
