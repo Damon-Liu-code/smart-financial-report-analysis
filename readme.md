@@ -35,7 +35,7 @@ textin_client = TextinOcr(
 )
 
 deepseek_client = FinancialAnalyst(
-    api_key="sk-k3k2jeBWSD7pEcLMMHTeHdAxmrw7DC5z78XharBWnYAJHneI"
+    api_key="sk-k3k2jeBWSD7pEcL**************z78XharBWnYAJHneI"
 )
 ```
 请将上述密钥替换为你自己的有效密钥。
